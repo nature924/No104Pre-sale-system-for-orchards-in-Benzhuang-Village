@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.GuoyuanYuyueDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.guoyuan_yuyue_uuid_number as guoyuanYuyueUuidNumber
+        ,a.guoyuan_id as guoyuanId
+        ,a.yonghu_id as yonghuId
+        ,a.guoyuan_yuyue_text as guoyuanYuyueText
+        ,a.guoyuan_yuyue_yesno_types as guoyuanYuyueYesnoTypes
+        ,a.guoyuan_yuyue_yesno_text as guoyuanYuyueYesnoText
+        ,a.guoyuan_yuyue_shenhe_time as guoyuanYuyueShenheTime
+        ,a.guoyuan_yuyue_time as guoyuanYuyueTime
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.GuoyuanYuyueView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,guoyuan.guoyuan_name as guoyuanName
+        ,guoyuan.guoyuan_photo as guoyuanPhoto
+        ,guoyuan.guoyuan_types as guoyuanTypes
+        ,guoyuan.guoyuan_address as guoyuanAddress
+        ,guoyuan.guoyuan_content as guoyuanContent
+        ,guoyuan.guoyuan_delete as guoyuanDelete
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.new_money as newMoney
+        ,yonghu.yonghu_email as yonghuEmail
+
+        FROM guoyuan_yuyue  a
+        left JOIN guoyuan guoyuan ON a.guoyuan_id = guoyuan.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.guoyuanYuyueUuidNumber != '' and params.guoyuanYuyueUuidNumber != null and params.guoyuanYuyueUuidNumber != 'null' ">
+                and a.guoyuan_yuyue_uuid_number like CONCAT('%',#{params.guoyuanYuyueUuidNumber},'%')
+            </if>
+            <if test="params.guoyuanId != null and params.guoyuanId != ''">
+                and (
+                    a.guoyuan_id = #{params.guoyuanId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test=" params.guoyuanYuyueText != '' and params.guoyuanYuyueText != null and params.guoyuanYuyueText != 'null' ">
+                and a.guoyuan_yuyue_text like CONCAT('%',#{params.guoyuanYuyueText},'%')
+            </if>
+            <if test="params.guoyuanYuyueYesnoTypes != null and params.guoyuanYuyueYesnoTypes != ''">
+                and a.guoyuan_yuyue_yesno_types = #{params.guoyuanYuyueYesnoTypes}
+            </if>
+            <if test=" params.guoyuanYuyueYesnoText != '' and params.guoyuanYuyueYesnoText != null and params.guoyuanYuyueYesnoText != 'null' ">
+                and a.guoyuan_yuyue_yesno_text like CONCAT('%',#{params.guoyuanYuyueYesnoText},'%')
+            </if>
+            <if test=" params.guoyuanYuyueShenheTimeStart != '' and params.guoyuanYuyueShenheTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.guoyuan_yuyue_shenhe_time) >= UNIX_TIMESTAMP(#{params.guoyuanYuyueShenheTimeStart}) ]]>
+            </if>
+            <if test=" params.guoyuanYuyueShenheTimeEnd != '' and params.guoyuanYuyueShenheTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.guoyuan_yuyue_shenhe_time) <= UNIX_TIMESTAMP(#{params.guoyuanYuyueShenheTimeEnd}) ]]>
+            </if>
+            <if test=" params.guoyuanYuyueTimeStart != '' and params.guoyuanYuyueTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.guoyuan_yuyue_time) >= UNIX_TIMESTAMP(#{params.guoyuanYuyueTimeStart}) ]]>
+            </if>
+            <if test=" params.guoyuanYuyueTimeEnd != '' and params.guoyuanYuyueTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.guoyuan_yuyue_time) <= UNIX_TIMESTAMP(#{params.guoyuanYuyueTimeEnd}) ]]>
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断果园的id不为空 -->
+            <if test=" params.guoyuanIdNotNull != '' and params.guoyuanIdNotNull != null and params.guoyuanIdNotNull != 'null' ">
+                and a.guoyuan_id IS NOT NULL
+            </if>
+            <if test=" params.guoyuanName != '' and params.guoyuanName != null and params.guoyuanName != 'null' ">
+                and guoyuan.guoyuan_name like CONCAT('%',#{params.guoyuanName},'%')
+            </if>
+            <if test="params.guoyuanTypes != null  and params.guoyuanTypes != ''">
+                and guoyuan.guoyuan_types = #{params.guoyuanTypes}
+            </if>
+
+            <if test=" params.guoyuanAddress != '' and params.guoyuanAddress != null and params.guoyuanAddress != 'null' ">
+                and guoyuan.guoyuan_address like CONCAT('%',#{params.guoyuanAddress},'%')
+            </if>
+            <if test=" params.guoyuanContent != '' and params.guoyuanContent != null and params.guoyuanContent != 'null' ">
+                and guoyuan.guoyuan_content like CONCAT('%',#{params.guoyuanContent},'%')
+            </if>
+            <if test="params.guoyuanDeleteStart != null  and params.guoyuanDeleteStart != '' ">
+                <![CDATA[  and guoyuan.guoyuan_delete >= #{params.guoyuanDeleteStart}   ]]>
+            </if>
+            <if test="params.guoyuanDeleteEnd != null  and params.guoyuanDeleteEnd != '' ">
+                <![CDATA[  and guoyuan.guoyuan_delete <= #{params.guoyuanDeleteEnd}   ]]>
+            </if>
+            <if test="params.guoyuanDelete != null  and params.guoyuanDelete != '' ">
+                and guoyuan.guoyuan_delete = #{params.guoyuanDelete}
+            </if>
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test="params.newMoneyStart != null ">
+                <![CDATA[  and yonghu.new_money >= #{params.newMoneyStart}   ]]>
+            </if>
+            <if test="params.newMoneyEnd != null ">
+                <![CDATA[  and yonghu.new_money <= #{params.newMoneyEnd}   ]]>
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

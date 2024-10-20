@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ShuiguoDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.guoyuan_id as guoyuanId
+        ,a.shuiguo_name as shuiguoName
+        ,a.shuiguo_uuid_number as shuiguoUuidNumber
+        ,a.shuiguo_photo as shuiguoPhoto
+        ,a.shuiguo_address as shuiguoAddress
+        ,a.shuiguo_new_money as shuiguoNewMoney
+        ,a.shuiguo_types as shuiguoTypes
+        ,a.shuiguo_kucun_number as shuiguoKucunNumber
+        ,a.shuiguo_content as shuiguoContent
+        ,a.shuiguo_delete as shuiguoDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ShuiguoView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,guoyuan.guoyuan_name as guoyuanName
+        ,guoyuan.guoyuan_photo as guoyuanPhoto
+        ,guoyuan.guoyuan_types as guoyuanTypes
+        ,guoyuan.guoyuan_address as guoyuanAddress
+        ,guoyuan.guoyuan_content as guoyuanContent
+        ,guoyuan.guoyuan_delete as guoyuanDelete
+
+        FROM shuiguo  a
+        left JOIN guoyuan guoyuan ON a.guoyuan_id = guoyuan.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.guoyuanId != null and params.guoyuanId != ''">
+                and (
+                    a.guoyuan_id = #{params.guoyuanId}
+                )
+            </if>
+            <if test=" params.shuiguoName != '' and params.shuiguoName != null and params.shuiguoName != 'null' ">
+                and a.shuiguo_name like CONCAT('%',#{params.shuiguoName},'%')
+            </if>
+            <if test=" params.shuiguoUuidNumber != '' and params.shuiguoUuidNumber != null and params.shuiguoUuidNumber != 'null' ">
+                and a.shuiguo_uuid_number like CONCAT('%',#{params.shuiguoUuidNumber},'%')
+            </if>
+            <if test=" params.shuiguoAddress != '' and params.shuiguoAddress != null and params.shuiguoAddress != 'null' ">
+                and a.shuiguo_address like CONCAT('%',#{params.shuiguoAddress},'%')
+            </if>
+            <if test="params.shuiguoNewMoneyStart != null ">
+                <![CDATA[  and a.shuiguo_new_money >= #{params.shuiguoNewMoneyStart}   ]]>
+            </if>
+            <if test="params.shuiguoNewMoneyEnd != null ">
+                <![CDATA[  and a.shuiguo_new_money <= #{params.shuiguoNewMoneyEnd}   ]]>
+            </if>
+            <if test="params.shuiguoTypes != null and params.shuiguoTypes != ''">
+                and a.shuiguo_types = #{params.shuiguoTypes}
+            </if>
+            <if test="params.shuiguoKucunNumberStart != null and params.shuiguoKucunNumberStart != ''">
+                <![CDATA[  and a.shuiguo_kucun_number >= #{params.shuiguoKucunNumberStart}   ]]>
+            </if>
+            <if test="params.shuiguoKucunNumberEnd != null and params.shuiguoKucunNumberEnd != ''">
+                <![CDATA[  and a.shuiguo_kucun_number <= #{params.shuiguoKucunNumberEnd}   ]]>
+            </if>
+             <if test="params.shuiguoKucunNumber != null and params.shuiguoKucunNumber != ''">
+                and a.shuiguo_kucun_number = #{params.shuiguoKucunNumber}
+             </if>
+            <if test=" params.shuiguoContent != '' and params.shuiguoContent != null and params.shuiguoContent != 'null' ">
+                and a.shuiguo_content like CONCAT('%',#{params.shuiguoContent},'%')
+            </if>
+            <if test="params.shuiguoDeleteStart != null and params.shuiguoDeleteStart != ''">
+                <![CDATA[  and a.shuiguo_delete >= #{params.shuiguoDeleteStart}   ]]>
+            </if>
+            <if test="params.shuiguoDeleteEnd != null and params.shuiguoDeleteEnd != ''">
+                <![CDATA[  and a.shuiguo_delete <= #{params.shuiguoDeleteEnd}   ]]>
+            </if>
+             <if test="params.shuiguoDelete != null and params.shuiguoDelete != ''">
+                and a.shuiguo_delete = #{params.shuiguoDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断果园的id不为空 -->
+            <if test=" params.guoyuanIdNotNull != '' and params.guoyuanIdNotNull != null and params.guoyuanIdNotNull != 'null' ">
+                and a.guoyuan_id IS NOT NULL
+            </if>
+            <if test=" params.guoyuanName != '' and params.guoyuanName != null and params.guoyuanName != 'null' ">
+                and guoyuan.guoyuan_name like CONCAT('%',#{params.guoyuanName},'%')
+            </if>
+            <if test="params.guoyuanTypes != null  and params.guoyuanTypes != ''">
+                and guoyuan.guoyuan_types = #{params.guoyuanTypes}
+            </if>
+
+            <if test=" params.guoyuanAddress != '' and params.guoyuanAddress != null and params.guoyuanAddress != 'null' ">
+                and guoyuan.guoyuan_address like CONCAT('%',#{params.guoyuanAddress},'%')
+            </if>
+            <if test=" params.guoyuanContent != '' and params.guoyuanContent != null and params.guoyuanContent != 'null' ">
+                and guoyuan.guoyuan_content like CONCAT('%',#{params.guoyuanContent},'%')
+            </if>
+            <if test="params.guoyuanDeleteStart != null  and params.guoyuanDeleteStart != '' ">
+                <![CDATA[  and guoyuan.guoyuan_delete >= #{params.guoyuanDeleteStart}   ]]>
+            </if>
+            <if test="params.guoyuanDeleteEnd != null  and params.guoyuanDeleteEnd != '' ">
+                <![CDATA[  and guoyuan.guoyuan_delete <= #{params.guoyuanDeleteEnd}   ]]>
+            </if>
+            <if test="params.guoyuanDelete != null  and params.guoyuanDelete != '' ">
+                and guoyuan.guoyuan_delete = #{params.guoyuanDelete}
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.GuoyuanDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.guoyuan_name as guoyuanName
+        ,a.guoyuan_photo as guoyuanPhoto
+        ,a.guoyuan_types as guoyuanTypes
+        ,a.guoyuan_address as guoyuanAddress
+        ,a.guoyuan_content as guoyuanContent
+        ,a.guoyuan_delete as guoyuanDelete
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.GuoyuanView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+
+        FROM guoyuan  a
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.guoyuanName != '' and params.guoyuanName != null and params.guoyuanName != 'null' ">
+                and a.guoyuan_name like CONCAT('%',#{params.guoyuanName},'%')
+            </if>
+            <if test="params.guoyuanTypes != null and params.guoyuanTypes != ''">
+                and a.guoyuan_types = #{params.guoyuanTypes}
+            </if>
+            <if test=" params.guoyuanAddress != '' and params.guoyuanAddress != null and params.guoyuanAddress != 'null' ">
+                and a.guoyuan_address like CONCAT('%',#{params.guoyuanAddress},'%')
+            </if>
+            <if test=" params.guoyuanContent != '' and params.guoyuanContent != null and params.guoyuanContent != 'null' ">
+                and a.guoyuan_content like CONCAT('%',#{params.guoyuanContent},'%')
+            </if>
+            <if test="params.guoyuanDeleteStart != null and params.guoyuanDeleteStart != ''">
+                <![CDATA[  and a.guoyuan_delete >= #{params.guoyuanDeleteStart}   ]]>
+            </if>
+            <if test="params.guoyuanDeleteEnd != null and params.guoyuanDeleteEnd != ''">
+                <![CDATA[  and a.guoyuan_delete <= #{params.guoyuanDeleteEnd}   ]]>
+            </if>
+             <if test="params.guoyuanDelete != null and params.guoyuanDelete != ''">
+                and a.guoyuan_delete = #{params.guoyuanDelete}
+             </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
